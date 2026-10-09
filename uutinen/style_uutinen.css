@@ -1,0 +1,84 @@
+:root {
+    --color-primary: rgb(22, 101, 52);       /* vihreä */
+    --color-secondary: rgb(21, 94, 117);     /* sinivihreä */
+    --color-accent: rgb(161, 98, 7);         /* kullanruskea */
+    --color-background: rgb(248, 250, 252);  /* vaalea tausta */
+    --color-surface: rgb(255, 255, 255);     /* valkoinen */
+    --color-text: rgb(23, 32, 51);            /* tumma teksti */
+    --color-text-secondary: rgb(255, 255, 255); /* valkoinen */
+}
+
+
+body {
+    margin: 0;
+    color: var(--color-text);
+    background-color: var(--color-background);
+    font-family: 'Roboto', sans-serif;
+}
+
+
+header {
+    background-color: var(--color-primary);
+    padding: 10px;
+}
+
+
+header a {
+    font-size: 3em;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    margin-left: 10px;
+}
+
+
+main {
+    padding: 10px 10px 40px 10px;
+}
+
+
+h1 {
+    color: var(--color-primary);
+    margin-top: 0px;
+}
+
+
+h2 {
+    color: var(--color-primary);
+    margin-top: 30px;
+}
+
+
+h3 {
+    color: var(--color-secondary);
+}
+
+
+.coloraccent {
+    color: var(--color-accent);
+    font-weight: bold;
+}
+
+
+.quote {
+    border-left: var(--color-accent) solid 5px;
+    padding-left: 20px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    background-color: var(--color-surface);
+}
+
+
+.budjettikompassi {
+    width: 80%;
+    max-width: 300px;
+    display: block;
+    margin: auto;
+    border-radius: 10px;
+}
+
+
+main {
+    container-type: inline-size;
+    container-name: column;
+}
+

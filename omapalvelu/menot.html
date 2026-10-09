@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+
+<html lang="fi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link rel="stylesheet" href="style.css">
+<title>Budjettikompassi – Tulot ja menot</title>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+</head>
+<body class="bg-background text-on-surface min-h-screen flex flex-col items-center antialiased relative">
+<!-- Outer Smartphone Shell / Desktop Centered Container -->
+<div class="w-full max-w-lg min-h-screen flex flex-col bg-background relative shadow-sm pb-36">
+<!-- TOP APP BAR -->
+<header class="sticky top-0 z-40 bg-surface-container-lowest border-b border-surface-container shadow-sm">
+<div class="flex justify-between items-center w-full px-space-md py-space-sm max-w-lg mx-auto">
+<!-- Title -->
+<div class="flex flex-col items-center">
+<h1 class="text-headline-md font-headline-md text-primary tracking-tight" id="top-bar-title">Menot</h1>
+</div>
+<!-- Segmented Tabs (Tulot / Menot) -->
+<nav class="grid grid-cols-2 px-space-md pt-2 border-t border-surface-container-low bg-surface-container-lowest" role="tablist">
+<!-- Tab 1: Tulot -->
+<button aria-selected="false" class="flex flex-col items-center pb-3 pt-1 relative text-outline hover:text-on-surface font-label-lg text-label-lg transition-colors cursor-pointer" id="tab-btn-tulot" onclick="switchMainTab('tulot')" role="tab" type="button">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[20px]" id="tab-icon-tulot">trending_up</span>
+<span>Tulot</span>
+</div>
+<!-- Active Indicator line -->
+<div class="absolute bottom-0 left-4 right-4 h-[3px] bg-primary-container rounded-full transition-all hidden" id="tab-indicator-tulot"></div>
+</button>
+<!-- Tab 2: Menot -->
+<button aria-selected="true" class="flex flex-col items-center pb-3 pt-1 relative text-primary font-label-lg text-label-lg transition-colors cursor-pointer" id="tab-btn-menot" onclick="switchMainTab('menot')" role="tab" type="button">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[20px]" id="tab-icon-menot">trending_down</span>
+<span>Menot</span>
+</div>
+<div class="absolute bottom-0 left-4 right-4 h-[3px] bg-primary-container rounded-full transition-all" id="tab-indicator-menot"></div>
+</button>
+</nav>
+</header>
+<!-- MAIN CONTENT CONTAINER -->
+<main class="flex-1 px-space-md pt-space-md space-y-space-lg">
+<!-- ======================= 1. TULOT PAGE VIEW ======================= -->
+<div class="space-y-space-lg hidden" id="view-tulot">
+<!-- HERO BENTO SUMMARY CARD: Tulot -->
+<section class="bg-surface-container-lowest rounded-2xl p-space-md border border-outline-variant/40 shadow-sm relative overflow-hidden">
+<div class="flex items-center justify-between pb-3">
+<div>
+<span class="text-label-md font-label-md text-outline block">Kuukauden varmistetut tulot</span>
+<div class="flex items-baseline gap-2 mt-0.5">
+<span class="text-headline-xl-mobile font-headline-xl-mobile text-primary tracking-tight" id="hero-income-val">–</span>
+</div>
+</div>
+<div class="w-12 h-12 rounded-2xl bg-surface-container flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-[28px]">account_balance_wallet</span>
+</div>
+</div>
+<!-- Tonal Budget Health Visual Indicator -->
+<div class="mt-2 pt-3 border-t border-surface-container flex flex-col gap-1.5">
+<div class="flex justify-between text-label-sm font-label-sm">
+<span class="text-on-surface-variant">Menot kattavat tuloista</span>
+<span class="text-secondary font-label-md" id="budget-percentage-text">Ei vielä tietoja</span>
+</div>
+<div class="w-full h-2.5 bg-surface-container rounded-full overflow-hidden flex">
+<div class="h-full bg-secondary transition-all duration-300" id="bar-expenses"></div>
+<div class="h-full bg-primary-container transition-all duration-300" id="bar-remaining"></div>
+</div>
+<div class="flex justify-between text-body-sm font-body-sm text-outline pt-0.5">
+<span id="sub-expenses-val">Ei vielä menoja</span>
+<span class="text-primary font-label-md" id="sub-remaining-val">Ei vielä tietoja</span>
+</div>
+</div>
+</section>
+<!-- Tulorivit osio -->
+<section class="space-y-space-sm" id="section-income-group">
+<div class="flex items-center justify-between px-1">
+<h2 class="text-headline-sm font-headline-sm text-on-surface flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary text-[20px]">account_balance</span>
+Kaikki kuukauden tulot
+</h2>
+</div>
+<!-- Tulokorttien lista (renderoidaan dynaamisesti JS:stä) -->
+<div class="space-y-2.5" id="income-list"></div>
+<!-- Tulot Yhteensä bar -->
+<div class="flex justify-between items-center bg-primary-fixed/20 border border-primary-container/30 px-space-md py-3 rounded-2xl mt-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-container text-[20px]">calculate</span>
+<span class="text-label-lg font-label-lg text-primary">Yhteensä tulot:</span>
+</div>
+<span class="text-headline-md font-headline-md text-primary font-bold" id="income-total-val">–</span>
+</div>
+</section>
+</div>
+<!-- ======================= 2. MENOT PAGE VIEW ======================= -->
+<div class="space-y-space-lg block" id="view-menot">
+<!-- HERO BENTO SUMMARY CARD: Menot -->
+<section class="bg-surface-container-lowest rounded-2xl p-space-md border border-outline-variant/40 shadow-sm relative overflow-hidden">
+<div class="flex items-center justify-between pb-3">
+<div>
+<span class="text-label-md font-label-md text-outline block">Kuukauden kokonaismenot</span>
+<div class="flex items-baseline gap-2 mt-0.5">
+<span class="text-headline-xl-mobile font-headline-xl-mobile text-secondary tracking-tight" id="hero-expense-val">–</span>
+</div>
+</div>
+<div class="w-12 h-12 rounded-2xl bg-secondary-container/40 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[28px]">credit_card</span>
+</div>
+</div>
+<!-- Expense breakdown split (Kiinteät vs Joustavat) -->
+<div class="mt-2 pt-3 border-t border-surface-container grid grid-cols-2 gap-3">
+<div class="bg-surface-container-low rounded-xl p-2.5">
+<div class="flex items-center gap-1.5 text-label-sm text-outline">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span>Kiinteät menot</span>
+</div>
+<p class="text-headline-sm font-bold text-on-surface mt-1" id="exp-fixed-total">–</p>
+<span class="text-body-sm text-outline">Vuokra, laskut</span>
+</div>
+<div class="bg-surface-container-low rounded-xl p-2.5">
+<div class="flex items-center gap-1.5 text-label-sm text-outline">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+<span>Joustavat arjen menot</span>
+</div>
+<p class="text-headline-sm font-bold text-on-surface mt-1" id="exp-flex-total">–</p>
+<span class="text-body-sm text-outline">Ruoka, matkat, vapaa-aika</span>
+</div>
+</div>
+</section>
+<!-- Menorivit osio -->
+<section class="space-y-space-sm" id="section-expense-group">
+<div class="flex items-center justify-between px-1">
+<h2 class="text-headline-sm font-headline-sm text-on-surface flex items-center gap-1.5">
+<span class="material-symbols-outlined text-secondary text-[20px]">shopping_cart</span>
+Kaikki kuukauden menot
+</h2>
+</div>
+<!-- Menokorttien lista (renderoidaan dynaamisesti JS:stä) -->
+<div class="space-y-2.5" id="expense-list"></div>
+<!-- Menot Yhteensä bar -->
+<div class="flex justify-between items-center bg-surface-container border border-outline-variant/40 px-space-md py-3 rounded-2xl mt-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[20px]">receipt_long</span>
+<span class="text-label-lg font-label-lg text-secondary">Yhteensä menot:</span>
+</div>
+<span class="text-headline-md font-headline-md text-secondary font-bold" id="expense-total-val">–</span>
+</div>
+</section>
+</div>
+</main>
+<!-- FLOATING ACTION BUTTON (Lisää tapahtuma) -->
+<div class="fixed bottom-20 left-0 right-0 max-w-lg mx-auto px-space-md pointer-events-none z-40 flex justify-end">
+<button class="pointer-events-auto bg-primary-container text-on-primary font-label-lg text-label-lg px-space-lg px-5 py-3.5 rounded-full shadow-lg flex items-center gap-2 hover:bg-primary transition-all active:scale-[0.97] cursor-pointer" id="fab-add-btn" type="button">
+<span class="material-symbols-outlined text-[20px]">add</span>
+<span id="fab-label">+ Lisää meno</span>
+</button>
+</div>
+<!-- BOTTOM NAVIGATION BAR (Exact shared bottom navigation) -->
+<nav aria-label="Alapalkin päänavigaatio"
+     class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-space-xs pb-safe bg-surface-container-lowest shadow-md border-t border-surface-container">
+
+    <a class="flex flex-col items-center justify-center text-on-surface-variant py-space-xs hover:bg-surface-container-low transition-transform duration-150 active:scale-[0.98] flex-1 min-w-0"
+       href="etusivu.html">
+        <span class="material-symbols-outlined text-xl">home</span>
+        <span class="font-label-sm text-[10px] tracking-tight mt-0.5 truncate">Etusivu</span>
+    </a>
+
+    <a aria-current="page"
+     class="flex flex-col items-center justify-center text-on-surface-variant py-space-xs hover:bg-surface-container-low transition-transform duration-150 active:scale-[0.98] flex-1 min-w-0"
+       href="menot.html">
+        <span class="material-symbols-outlined text-xl">receipt_long</span>
+        <span class="font-label-sm text-[10px] tracking-tight mt-0.5 truncate">Tulot/Menot</span>
+    </a>
+
+    <a class="flex flex-col items-center justify-center text-primary-container py-space-xs font-semibold hover:bg-surface-container-low transition-transform duration-150 active:scale-[0.98] flex-1 min-w-0"
+       href="mitajos.html">
+        <span class="material-symbols-outlined text-xl">tune</span>
+        <span class="font-label-sm text-[10px] tracking-tight mt-0.5 font-bold truncate">Mitä jos?</span>
+    </a>
+
+</nav>
+<!-- BOTTOM SHEET / MODAL DIALOG CONTAINER (Z-INDEX 60) -->
+<div aria-labelledby="modal-sheet-title" aria-modal="true" class="fixed inset-0 z-[60] pointer-events-none flex justify-center items-end sheet-hidden" id="bottom-sheet-root" role="dialog">
+<!-- Backdrop -->
+<div class="fixed inset-0 bg-inverse-surface/60 backdrop-blur-[2px] transition-opacity cursor-pointer" id="bottom-sheet-backdrop" onclick="closeModal()"></div>
+<!-- Sheet Content Box -->
+<div class="w-full max-w-lg bg-surface-container-lowest rounded-t-[28px] shadow-2xl relative z-10 max-h-[92vh] overflow-y-auto flex flex-col pointer-events-auto border-t border-outline-variant/30 pb-10" id="bottom-sheet-content">
+<!-- Pull handle -->
+<div class="w-12 h-1.5 bg-outline-variant/70 rounded-full mx-auto mt-3 mb-1 cursor-pointer" onclick="closeModal()"></div>
+<!-- Header -->
+<div class="px-space-md py-2 flex items-center justify-between border-b border-surface-container">
+<div>
+<h3 class="text-headline-md font-headline-md text-on-surface tracking-tight" id="modal-sheet-title">Uusi meno</h3>
+<p class="text-body-sm text-outline" id="modal-sheet-subtitle">Merkitse ostos tai tuleva lasku</p>
+</div>
+<button aria-label="Sulje" class="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center text-outline hover:text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer" onclick="closeModal()" type="button">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<!-- Validation Error Notice -->
+<div class="mx-space-md mt-3 px-3 py-2 rounded-xl bg-error-container/60 border border-error/30 text-on-error-container text-body-sm hidden flex items-center gap-2" id="form-error-alert">
+<span class="material-symbols-outlined text-[18px] text-error">error</span>
+<span id="form-error-text">Täytä vaaditut kentät.</span>
+</div>
+<!-- Modal Form Body -->
+<div class="p-space-md space-y-4">
+<!-- Type Selector: Meno / Tulo -->
+<div class="bg-surface-container-low p-1 rounded-xl grid grid-cols-2 gap-1 border border-outline-variant/20">
+<button class="py-2.5 rounded-lg font-label-lg text-sm flex items-center justify-center gap-1.5 transition-all shadow-sm bg-surface-container-lowest text-secondary font-bold cursor-pointer" id="btn-type-meno" onclick="selectTransactionType('meno')" type="button">
+<span class="material-symbols-outlined text-[18px]">trending_down</span>
+Meno
+</button>
+<button class="py-2.5 rounded-lg font-label-lg text-sm flex items-center justify-center gap-1.5 transition-all text-outline hover:text-on-surface cursor-pointer" id="btn-type-tulo" onclick="selectTransactionType('tulo')" type="button">
+<span class="material-symbols-outlined text-[18px]">trending_up</span>
+Tulo
+</button>
+</div>
+<!-- Amount Input -->
+<div class="bg-surface-container-low rounded-2xl p-space-md border border-outline-variant/30 text-center transition-all" id="amount-field-wrapper">
+<label class="block text-label-sm font-label-sm text-outline mb-1" for="form-amount">Summa euroina (€) <span class="text-error">*</span></label>
+<div class="flex items-center justify-center gap-1">
+<input class="text-3xl font-extrabold text-on-surface tracking-tight bg-transparent text-center w-40 focus:outline-none border-0 p-0 focus:ring-0" id="form-amount" min="0.01" placeholder="0" step="any" type="number"/>
+<span class="text-2xl font-bold text-outline">€</span>
+</div>
+</div>
+<!-- Title / Description Input -->
+<div>
+<label class="block text-label-md font-label-md text-on-surface mb-1" for="form-title">Nimi / Selite <span class="text-error">*</span></label>
+<div class="relative">
+<input class="w-full bg-surface-container-lowest border border-outline-variant/60 rounded-xl px-3.5 py-2.5 text-body-md text-on-surface placeholder:text-outline/70 focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container" id="form-title" placeholder="esim. Stipendi, Sähkölasku..." type="text"/>
+<span class="material-symbols-outlined absolute right-3 top-3 text-[18px] text-outline pointer-events-none">edit</span>
+</div>
+</div>
+<!-- Category Select -->
+<div>
+<label class="block text-label-md font-label-md text-on-surface mb-1" for="form-category-select">Kategoria</label>
+<div class="relative">
+<select class="w-full bg-surface-container-lowest border border-outline-variant/60 rounded-xl px-3.5 py-2.5 text-body-md text-on-surface focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container cursor-pointer appearance-none" id="form-category-select"></select>
+<span class="material-symbols-outlined absolute right-3 top-3 text-[20px] text-outline pointer-events-none">expand_more</span>
+</div>
+</div>
+<!-- Subtype / Recurrence (Kiinteä vs Joustava / Toistuvuus) -->
+<div>
+<label class="block text-label-md font-label-md text-on-surface mb-1" id="label-subtype">Luokittelu / Toistuvuus</label>
+<div class="relative">
+<select class="w-full bg-surface-container-lowest border border-outline-variant/60 rounded-xl px-3.5 py-2.5 text-body-md text-on-surface focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container cursor-pointer appearance-none" id="form-subtype-select">
+<option value="Joustava">Joustava arjen meno</option>
+<option value="Kiinteä">Kiinteä toistuva meno</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-3 text-[20px] text-outline pointer-events-none">expand_more</span>
+</div>
+</div>
+<!-- Action buttons -->
+<div class="pt-2 pb-1 space-y-2">
+<button class="w-full bg-primary-container text-on-primary font-label-lg py-3.5 px-4 rounded-xl shadow-md hover:bg-primary transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer font-bold" id="form-submit-btn" onclick="saveTransaction()" type="button">
+<span class="material-symbols-outlined text-[20px]">check</span>
+<span id="form-submit-label">Lisää tapahtuma</span>
+</button>
+<button class="w-full py-2.5 text-center text-body-sm text-outline hover:text-on-surface transition-colors cursor-pointer" onclick="closeModal()" type="button">
+Peruuta
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- TOAST NOTIFICATION -->
+<div class="fixed top-5 left-1/2 -translate-x-1/2 z-[70] bg-primary text-on-primary px-4 py-2.5 rounded-full shadow-lg flex items-center gap-2 text-label-md pointer-events-none opacity-0 -translate-y-4 transition-all" id="toast-notification">
+<span class="material-symbols-outlined text-[18px]">check_circle</span>
+<span id="toast-message">Lisätty onnistuneesti!</span>
+</div>
+</div>
+<!-- JAVASCRIPT STATE & LOGIC -->
+<script>
+  // Robust In-Memory State & LocalStorage Integration
+  const STORAGE_KEY = 'budjettikompassi_data_v2';
+  let currentActiveTab = 'menot'; // 'tulot' or 'menot'
+  let currentModalType = 'meno';   // 'meno' or 'tulo'
+  let idCounter = 100;
+
+
+  let incomes = [];
+  let expenses = [];
+
+  function loadFromStorage() {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        incomes = Array.isArray(parsed.incomes) ? parsed.incomes : [];
+        expenses = Array.isArray(parsed.expenses) ? parsed.expenses : [];
+      } else {
+        incomes = [];
+        expenses = [];
+      }
+    } catch (e) {
+      console.warn('Virhe ladattaessa localStoragesta:', e);
+      incomes = [];
+      expenses = [];
+    }
+  }
+
+  function saveToStorage(notify = true) {
+    try {
+      const currentStored = localStorage.getItem(STORAGE_KEY);
+      let fullData = {};
+      if (currentStored) {
+        try {
+          fullData = JSON.parse(currentStored) || {};
+        } catch (e) {}
+      }
+      fullData.incomes = incomes;
+      fullData.expenses = expenses;
+      fullData.lastUpdated = new Date().toISOString();
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(fullData));
+
+      if (notify) {
+        window.dispatchEvent(new Event('storage'));
+      }
+    } catch (e) {
+      console.error('Virhe tallennettaessa localStorageen:', e);
+    }
+  }
+
+  window.addEventListener('storage', (event) => {
+    // Kuunnellaan tallennustapahtumia samasta tai toisesta ikkunasta
+    if (!event.key || event.key === STORAGE_KEY) {
+      loadFromStorage();
+      renderList();
+    }
+  });
+
+
+  const categoriesMeno = ['Ruoka', 'Asuminen', 'Liikkuminen', 'Vapaa-aika', 'Tilaukset', 'Opiskelu', 'Muut'];
+  const categoriesTulo = ['Opintotuki', 'Palkka', 'Asumistuki', 'Opiskelu', 'Säästöt', 'Muut'];
+
+  // DOM Elements
+  const modalRoot = document.getElementById('bottom-sheet-root');
+  const formAmount = document.getElementById('form-amount');
+  const formTitle = document.getElementById('form-title');
+  const formCategorySelect = document.getElementById('form-category-select');
+  const formSubtypeSelect = document.getElementById('form-subtype-select');
+  const labelSubtype = document.getElementById('label-subtype');
+  const formErrorAlert = document.getElementById('form-error-alert');
+  const formErrorText = document.getElementById('form-error-text');
+  const toast = document.getElementById('toast-notification');
+  const toastMsg = document.getElementById('toast-message');
+
+  function getCategoryIcon(cat, type) {
+    if (type === 'tulo') {
+      if (cat.includes('Palkka')) return { icon: 'work', bg: 'bg-surface-container-low text-secondary' };
+      if (cat.includes('Opinto') || cat.includes('Opiskelu')) return { icon: 'school', bg: 'bg-surface-container-low text-primary-container' };
+      if (cat.includes('Asumis')) return { icon: 'apartment', bg: 'bg-surface-container-low text-primary-container' };
+      return { icon: 'attach_money', bg: 'bg-surface-container text-primary' };
+    }
+    // Menot
+    if (cat.includes('Ruoka')) return { icon: 'shopping_bag', bg: 'bg-tertiary-fixed/60 text-tertiary' };
+    if (cat.includes('Asuminen')) return { icon: 'home', bg: 'bg-secondary-container/40 text-secondary' };
+    if (cat.includes('Liikku')) return { icon: 'directions_bus', bg: 'bg-surface-container-high text-primary' };
+    if (cat.includes('Vapaa')) return { icon: 'sports_esports', bg: 'bg-surface-container-low text-secondary' };
+    if (cat.includes('Tilaus')) return { icon: 'subscriptions', bg: 'bg-surface-container text-on-surface-variant' };
+    if (cat.includes('Opiskelu')) return { icon: 'menu_book', bg: 'bg-surface-container text-primary' };
+    return { icon: 'receipt', bg: 'bg-surface-container text-on-surface-variant' };
+  }
+
+  function renderList() {
+    // 1. Render Incomes
+    const incomeListEl = document.getElementById('income-list');
+    if (!incomes || incomes.length === 0) {
+      incomeListEl.innerHTML = `<div class="p-6 text-center text-outline bg-surface-container-lowest rounded-2xl border border-outline-variant/30">Ei vielä lisättyjä tuloja.</div>`;
+    } else {
+      incomeListEl.innerHTML = incomes.map(item => {
+        const { icon, bg } = getCategoryIcon(item.category || '', 'tulo');
+        return `
+          <article class="bg-surface-container-lowest rounded-2xl p-space-md border border-outline-variant/30 shadow-sm flex items-center justify-between hover:bg-surface-container-low transition-colors group" data-id="${item.id}">
+            <div class="flex items-center gap-3">
+              <div class="w-11 h-11 rounded-xl ${bg} flex items-center justify-center border border-outline-variant/20">
+                <span class="material-symbols-outlined text-[22px]">${icon}</span>
+              </div>
+              <div>
+                <h3 class="text-headline-sm font-headline-sm text-on-surface">${item.title}</h3>
+                <p class="text-body-sm text-outline">${item.subtype || item.category}</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-headline-sm font-headline-sm text-primary block font-bold">+${Math.round(item.amount)} €</span>
+              <button aria-label="Poista tulo" class="w-8 h-8 rounded-full text-outline hover:text-error hover:bg-error-container/40 flex items-center justify-center transition-colors cursor-pointer" onclick="deleteItem('${item.id}', 'tulo')" type="button">
+                <span class="material-symbols-outlined text-[18px]">delete</span>
+              </button>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    // 2. Render Expenses
+    const expenseListEl = document.getElementById('expense-list');
+    if (!expenses || expenses.length === 0) {
+      expenseListEl.innerHTML = `<div class="p-6 text-center text-outline bg-surface-container-lowest rounded-2xl border border-outline-variant/30">Ei vielä lisättyjä menoja.</div>`;
+    } else {
+      expenseListEl.innerHTML = expenses.map(item => {
+        const { icon, bg } = getCategoryIcon(item.category || '', 'meno');
+        return `
+          <article class="bg-surface-container-lowest rounded-2xl p-space-md border border-outline-variant/30 shadow-sm flex items-center justify-between hover:bg-surface-container-low transition-colors group" data-id="${item.id}">
+            <div class="flex items-center gap-3">
+              <div class="w-11 h-11 rounded-xl ${bg} flex items-center justify-center">
+                <span class="material-symbols-outlined text-[22px]">${icon}</span>
+              </div>
+              <div>
+                <h3 class="text-headline-sm font-headline-sm text-on-surface">${item.title}</h3>
+                <p class="text-body-sm text-outline">${item.subtype || (item.category + ' • ' + (item.isFixed ? 'Kiinteä' : 'Joustava'))}</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-headline-sm font-headline-sm text-on-surface block font-bold">-${Math.round(item.amount)} €</span>
+              <button aria-label="Poista meno" class="w-8 h-8 rounded-full text-outline hover:text-error hover:bg-error-container/40 flex items-center justify-center transition-colors cursor-pointer" onclick="deleteItem('${item.id}', 'meno')" type="button">
+                <span class="material-symbols-outlined text-[18px]">delete</span>
+              </button>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    updateSummaries();
+  }
+
+  function updateSummaries() {
+    const totalIncome = (incomes || []).reduce((sum, item) => sum + Number(item.amount || 0), 0);
+    const totalExpense = (expenses || []).reduce((sum, item) => sum + Number(item.amount || 0), 0);
+    const fixedExpense = (expenses || []).filter(e => e.isFixed).reduce((sum, item) => sum + Number(item.amount || 0), 0);
+    const flexExpense = (expenses || []).filter(e => !e.isFixed).reduce((sum, item) => sum + Number(item.amount || 0), 0);
+    const hasIncome = totalIncome > 0;
+    const hasExpense = totalExpense > 0;
+    const hasData = hasIncome || hasExpense;
+    const remaining = totalIncome - totalExpense;
+    const percentage = totalIncome > 0 ? Math.min(Math.round((totalExpense / totalIncome) * 100), 100) : 0;
+    const remainingPercentage = Math.max(0, 100 - percentage);
+    const eur = value => `${Math.round(value).toLocaleString('fi-FI')} €`;
+
+    document.getElementById('hero-income-val').textContent = hasIncome ? eur(totalIncome) : '–';
+    document.getElementById('income-total-val').textContent = hasIncome ? eur(totalIncome) : '–';
+    document.getElementById('budget-percentage-text').textContent = hasData ? `${percentage} %` : 'Ei vielä tietoja';
+    document.getElementById('bar-expenses').style.width = hasData ? `${percentage}%` : '0%';
+    document.getElementById('bar-remaining').style.width = hasData ? `${remainingPercentage}%` : '0%';
+    document.getElementById('sub-expenses-val').textContent = hasExpense ? `Menot: ${eur(totalExpense)}` : 'Ei vielä menoja';
+    document.getElementById('sub-remaining-val').textContent = hasData ? `Jää säästöön & arkeen: ${eur(remaining)}` : 'Ei vielä tietoja';
+
+    document.getElementById('hero-expense-val').textContent = hasExpense ? eur(totalExpense) : '–';
+    document.getElementById('expense-total-val').textContent = hasExpense ? eur(totalExpense) : '–';
+    document.getElementById('exp-fixed-total').textContent = fixedExpense > 0 ? eur(fixedExpense) : '–';
+    document.getElementById('exp-flex-total').textContent = flexExpense > 0 ? eur(flexExpense) : '–';
+  }
+
+  function selectTransactionType(type) {
+    currentModalType = type;
+    const btnMeno = document.getElementById('btn-type-meno');
+    const btnTulo = document.getElementById('btn-type-tulo');
+    const submitLabel = document.getElementById('form-submit-label');
+    const modalTitle = document.getElementById('modal-sheet-title');
+    const modalSubtitle = document.getElementById('modal-sheet-subtitle');
+
+    formErrorAlert.classList.add('hidden');
+
+    if (type === 'meno') {
+      btnMeno.className = 'py-2.5 rounded-lg font-label-lg text-sm flex items-center justify-center gap-1.5 transition-all shadow-sm bg-surface-container-lowest text-secondary font-bold cursor-pointer';
+      btnTulo.className = 'py-2.5 rounded-lg font-label-lg text-sm flex items-center justify-center gap-1.5 transition-all text-outline hover:text-on-surface cursor-pointer';
+      submitLabel.textContent = 'Lisää meno';
+      modalTitle.textContent = 'Uusi meno';
+      modalSubtitle.textContent = 'Merkitse ostos tai tuleva lasku';
+      formTitle.placeholder = 'esim. Ruokaostokset, Vuokra, Kuntosali...';
+      labelSubtype.textContent = 'Luokittelu (Kiinteä vs Joustava)';
+      formSubtypeSelect.innerHTML = `
+        <option value="Joustava">Joustava arjen meno</option>
+        <option value="Kiinteä">Kiinteä toistuva meno</option>
+      `;
+      formCategorySelect.innerHTML = categoriesMeno.map(c => `<option value="${c}">${c}</option>`).join('');
+    } else {
+      btnTulo.className = 'py-2.5 rounded-lg font-label-lg text-sm flex items-center justify-center gap-1.5 transition-all shadow-sm bg-surface-container-lowest text-primary font-bold cursor-pointer';
+      btnMeno.className = 'py-2.5 rounded-lg font-label-lg text-sm flex items-center justify-center gap-1.5 transition-all text-outline hover:text-on-surface cursor-pointer';
+      submitLabel.textContent = 'Lisää tulo';
+      modalTitle.textContent = 'Uusi tulo';
+      modalSubtitle.textContent = 'Merkitse opintotuki, palkka tai muu tulo';
+      formTitle.placeholder = 'esim. Stipendi, Opintotuki, Sivutyö...';
+      labelSubtype.textContent = 'Toistuvuus';
+      formSubtypeSelect.innerHTML = `
+        <option value="Toistuva kuukausitulo">Toistuva kuukausitulo</option>
+        <option value="Kertaluontoinen tulo">Kertaluontoinen tulo</option>
+      `;
+      formCategorySelect.innerHTML = categoriesTulo.map(c => `<option value="${c}">${c}</option>`).join('');
+    }
+
+  }
+
+
+  function openModal(defaultType) {
+    const typeToOpen = defaultType || (currentActiveTab === 'tulot' ? 'tulo' : 'meno');
+    selectTransactionType(typeToOpen);
+    
+    // Reset form fields
+    formAmount.value = '';
+    formTitle.value = '';
+    formErrorAlert.classList.add('hidden');
+    formAmount.classList.remove('border-error');
+    formTitle.classList.remove('border-error');
+
+    modalRoot.classList.remove('sheet-hidden');
+    modalRoot.classList.add('sheet-visible');
+    setTimeout(() => {
+      formAmount.focus();
+    }, 150);
+  }
+
+  function closeModal() {
+    modalRoot.classList.remove('sheet-visible');
+    modalRoot.classList.add('sheet-hidden');
+    formErrorAlert.classList.add('hidden');
+  }
+
+  function saveTransaction() {
+    const rawAmount = parseFloat(formAmount.value);
+    const titleVal = formTitle.value.trim();
+    const categoryVal = formCategorySelect.value;
+    const subtypeVal = formSubtypeSelect.value;
+
+    // Validation
+    if (!rawAmount || isNaN(rawAmount) || rawAmount <= 0) {
+      formErrorText.textContent = 'Syötä kelvollinen summa suurempi kuin 0 €!';
+      formErrorAlert.classList.remove('hidden');
+      formAmount.focus();
+      return;
+    }
+    if (!titleVal) {
+      formErrorText.textContent = 'Syötä tapahtumalle nimi tai selite!';
+      formErrorAlert.classList.remove('hidden');
+      formTitle.focus();
+      return;
+    }
+
+    idCounter = Date.now();
+    const newId = `item-${idCounter}`;
+
+    if (currentModalType === 'tulo') {
+      incomes.unshift({
+        id: newId,
+        title: titleVal,
+        amount: rawAmount,
+        category: categoryVal,
+        subtype: `${categoryVal} • ${subtypeVal}`
+      });
+      showToast(`Tulo lisätty: +${rawAmount} €`);
+      if (currentActiveTab !== 'tulot') switchMainTab('tulot');
+    } else {
+      const isFixed = subtypeVal.toLowerCase().includes('kiinteä') || categoryVal.toLowerCase().includes('asuminen');
+      expenses.unshift({
+        id: newId,
+        title: titleVal,
+        amount: rawAmount,
+        category: categoryVal,
+        isFixed: isFixed,
+        subtype: `${categoryVal} • ${subtypeVal}`
+      });
+      showToast(`Meno lisätty: -${rawAmount} €`);
+      if (currentActiveTab !== 'menot') switchMainTab('menot');
+    }
+
+    saveToStorage(true);
+    renderList();
+    closeModal();
+  }
+
+  function deleteItem(id, type) {
+    if (type === 'tulo') {
+      const idx = incomes.findIndex(i => i.id === id);
+      if (idx !== -1) {
+        const removed = incomes.splice(idx, 1)[0];
+        showToast(`Tulo poistettu (-${Math.round(removed.amount)} €)`);
+      }
+    } else {
+      const idx = expenses.findIndex(e => e.id === id);
+      if (idx !== -1) {
+        const removed = expenses.splice(idx, 1)[0];
+        showToast(`Meno poistettu (-${Math.round(removed.amount)} €)`);
+      }
+    }
+    saveToStorage(true);
+    renderList();
+  }
+
+  function showToast(message) {
+    toastMsg.textContent = message;
+    toast.classList.remove('opacity-0', '-translate-y-4');
+    toast.classList.add('opacity-100', 'translate-y-0');
+    setTimeout(() => {
+      toast.classList.remove('opacity-100', 'translate-y-0');
+      toast.classList.add('opacity-0', '-translate-y-4');
+    }, 2500);
+  }
+
+  function switchMainTab(tab) {
+    currentActiveTab = tab;
+    const tabTulot = document.getElementById('tab-btn-tulot');
+    const tabMenot = document.getElementById('tab-btn-menot');
+    const indTulot = document.getElementById('tab-indicator-tulot');
+    const indMenot = document.getElementById('tab-indicator-menot');
+    const iconTulot = document.getElementById('tab-icon-tulot');
+    const iconMenot = document.getElementById('tab-icon-menot');
+
+    const viewTulot = document.getElementById('view-tulot');
+    const viewMenot = document.getElementById('view-menot');
+    const fabLabel = document.getElementById('fab-label');
+    const pageTitle = document.getElementById('top-bar-title');
+
+    if (tab === 'tulot') {
+      tabTulot.className = 'flex flex-col items-center pb-3 pt-1 relative text-primary font-label-lg text-label-lg transition-colors cursor-pointer';
+      tabTulot.setAttribute('aria-selected', 'true');
+      tabMenot.className = 'flex flex-col items-center pb-3 pt-1 relative text-outline hover:text-on-surface font-label-lg text-label-lg transition-colors cursor-pointer';
+      tabMenot.setAttribute('aria-selected', 'false');
+      
+      iconTulot.style.fontVariationSettings = "'FILL' 1";
+      iconMenot.style.fontVariationSettings = "'FILL' 0";
+
+      indTulot.classList.remove('hidden');
+      indMenot.classList.add('hidden');
+
+      viewTulot.classList.remove('hidden');
+      viewTulot.classList.add('block');
+      viewMenot.classList.remove('block');
+      viewMenot.classList.add('hidden');
+
+      fabLabel.textContent = '+ Lisää tulo';
+      pageTitle.textContent = 'Tulot';
+    } else {
+      tabMenot.className = 'flex flex-col items-center pb-3 pt-1 relative text-primary font-label-lg text-label-lg transition-colors cursor-pointer';
+      tabMenot.setAttribute('aria-selected', 'true');
+      tabTulot.className = 'flex flex-col items-center pb-3 pt-1 relative text-outline hover:text-on-surface font-label-lg text-label-lg transition-colors cursor-pointer';
+      tabTulot.setAttribute('aria-selected', 'false');
+
+      iconMenot.style.fontVariationSettings = "'FILL' 1";
+      iconTulot.style.fontVariationSettings = "'FILL' 0";
+
+      indMenot.classList.remove('hidden');
+      indTulot.classList.add('hidden');
+
+      viewMenot.classList.remove('hidden');
+      viewMenot.classList.add('block');
+      viewTulot.classList.remove('block');
+      viewTulot.classList.add('hidden');
+
+      fabLabel.textContent = '+ Lisää meno';
+      pageTitle.textContent = 'Menot';
+    }
+  }
+
+  // Hook Add Buttons
+
+  document.getElementById('fab-add-btn').addEventListener('click', () => {
+    openModal(currentActiveTab === 'tulot' ? 'tulo' : 'meno');
+  });
+
+  // Enable Enter key on form inputs to save
+  [formAmount, formTitle].forEach(input => {
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        saveTransaction();
+      }
+    });
+  });
+
+  // Initial load and render
+  loadFromStorage();
+  renderList();
+  switchMainTab('menot');
+</script>
+</body></html>

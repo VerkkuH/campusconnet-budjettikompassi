@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mitä jos? – Budjettikompassi</title>
+
+  <link rel="stylesheet" href="style.css">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,0,0" rel="stylesheet">
+</head>
+
+<body class="bg-slate-50 text-slate-900">
+  <header class="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
+    <div class="mx-auto flex max-w-2xl items-center gap-3 px-5 py-4">
+      
+      <div class="min-w-0 flex-1">
+        <h1 class="text-xl font-bold tracking-tight">Mitä jos?</h1>
+        <p class="text-xs text-slate-500">Kokeile, miten menojen pienentäminen vaikuttaa talouteesi</p>
+      </div>
+
+      <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+        Simulaattori
+      </span>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-2xl px-5 pb-32 pt-6">
+
+    <!-- Yhteenveto -->
+    <section class="mb-6">
+      <div class="overflow-hidden rounded-3xl bg-slate-900 p-6 text-white shadow-sm">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <p class="text-sm font-medium text-slate-300">Voisit säästää</p>
+            <p id="total-monthly-savings" class="mt-1 text-3xl font-bold tracking-tight">0,00 €/kk</p>
+          </div>
+
+          <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/10">
+            <span class="material-symbols-rounded">savings</span>
+          </div>
+        </div>
+
+        <div class="mt-5 border-t border-white/10 pt-4">
+          <div class="flex items-center justify-between gap-4">
+            <span class="text-sm text-slate-300">Vuodessa</span>
+            <strong id="total-annual-savings" class="text-lg">0,00 €</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Säästökohteet -->
+    <section class="mb-6">
+      <div class="mb-3 flex items-center justify-between gap-3">
+        <div>
+          <h2 class="text-lg font-bold">Kokeile arjen säästöjä</h2>
+          <p class="mt-1 text-sm text-slate-500">
+            Säädä menoja ja katso heti, paljonko rahaa jäisi enemmän käyttöön.
+          </p>
+        </div>
+
+        <span
+          id="item-count-badge"
+          class="shrink-0 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600"
+        >0 muuttujaa</span>
+      </div>
+
+      <div id="items-container" class="space-y-3"></div>
+
+      <!-- Lisää kohde -->
+      <div class="mt-4 rounded-2xl border border-dashed border-slate-300 bg-white p-4">
+        <button
+          id="show-add-form-btn"
+          type="button"
+          class="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-200"
+        >
+          <span class="material-symbols-rounded text-[20px]">add</span>
+          Lisää säästökohde
+        </button>
+
+        <div id="add-item-form" class="hidden pt-4">
+          <div class="grid gap-3">
+            <label class="block">
+              <span class="mb-1.5 block text-sm font-semibold text-slate-700">Säästökohteen nimi</span>
+              <input
+                id="new-item-name"
+                type="text"
+                maxlength="60"
+                placeholder="Esim. ravintolat"
+                class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+              >
+            </label>
+
+            <label class="block">
+              <span class="mb-1.5 block text-sm font-semibold text-slate-700">Nykyinen meno / kk</span>
+              <div class="relative">
+                <input
+                  id="new-item-cost"
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  inputmode="decimal"
+                  placeholder="0"
+                  class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 pr-12 text-sm outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+                >
+                <span class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm text-slate-400">€</span>
+              </div>
+            </label>
+
+            <div class="flex gap-2 pt-1">
+              <button
+                id="cancel-add-btn"
+                type="button"
+                class="flex-1 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+              >
+                Peruuta
+              </button>
+
+              <button
+                id="confirm-add-btn"
+                type="button"
+                class="flex-1 rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800"
+              >
+                Lisää kohde
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Ohje -->
+    <section class="mb-6 rounded-2xl border border-slate-200 bg-white p-4">
+      <div class="flex gap-3">
+        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100">
+          <span class="material-symbols-rounded text-slate-600">lightbulb</span>
+        </div>
+        <div>
+          <h3 class="text-sm font-bold">Näin simulaattori toimii</h3>
+          <p class="mt-1 text-sm leading-6 text-slate-500">
+            Jokainen kohde alkaa nykyisestä kuukausimenostasi. Vedä liukusäädintä vasemmalle
+            nähdäksesi, kuinka paljon säästäisit, jos menisit kyseiseen menoon vähemmän rahaa.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Toiminnot -->
+    <section class="grid gap-3">
+      <button
+        id="save-changes-btn"
+        type="button"
+        class="flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 px-5 py-4 text-sm font-bold text-white shadow-sm transition hover:bg-slate-800"
+      >
+        <span class="material-symbols-rounded">save</span>
+        Tallenna muutokset budjettiin
+      </button>
+
+      <button
+        id="reset-btn"
+        type="button"
+        class="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-4 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+      >
+        <span class="material-symbols-rounded">restart_alt</span>
+        Palauta lähtötilanne
+      </button>
+    </section>
+
+  </main>
+
+  <!-- Alapalkki -->
+  <nav class="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200 bg-white/95 backdrop-blur">
+    <div class="mx-auto grid max-w-2xl grid-cols-3 px-3 py-2">
+      <a
+        href="etusivu.html"
+        class="flex flex-col items-center gap-1 rounded-xl px-3 py-2 text-slate-500 hover:bg-slate-50"
+      >
+        <span class="material-symbols-rounded">home</span>
+        <span class="text-[11px] font-semibold">Etusivu</span>
+      </a>
+
+      <a
+        href="menot.html"
+        class="flex flex-col items-center gap-1 rounded-xl px-3 py-2 text-slate-500 hover:bg-slate-50"
+      >
+        <span class="material-symbols-rounded">payments</span>
+        <span class="text-[11px] font-semibold">Tulot/Menot</span>
+      </a>
+
+      <a
+        href="mitajos.html"
+        class="flex flex-col items-center gap-1 rounded-xl bg-slate-100 px-3 py-2 text-slate-900"
+        aria-current="page"
+      >
+        <span class="material-symbols-rounded">tune</span>
+        <span class="text-[11px] font-semibold">Mitä jos?</span>
+      </a>
+    </div>
+  </nav>
+
+  <div
+    id="toast"
+    class="pointer-events-none fixed bottom-24 left-1/2 z-50 hidden -translate-x-1/2 rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-lg"
+    role="status"
+    aria-live="polite"
+  ></div>
+
+  <script>
+    const STORAGE_KEY = "budjettikompassi_data_v2";
+
+    const elements = {
+      itemsContainer: document.getElementById("items-container"),
+      itemCountBadge: document.getElementById("item-count-badge"),
+      monthlySavings: document.getElementById("total-monthly-savings"),
+      annualSavings: document.getElementById("total-annual-savings"),
+
+      showAddFormBtn: document.getElementById("show-add-form-btn"),
+      addItemForm: document.getElementById("add-item-form"),
+      cancelAddBtn: document.getElementById("cancel-add-btn"),
+      confirmAddBtn: document.getElementById("confirm-add-btn"),
+      newItemName: document.getElementById("new-item-name"),
+      newItemCost: document.getElementById("new-item-cost"),
+
+      saveBtn: document.getElementById("save-changes-btn"),
+      resetBtn: document.getElementById("reset-btn"),
+      backBtn: document.getElementById("back-btn"),
+      toast: document.getElementById("toast")
+    };
+
+    let items = [];
+    let originalItems = [];
+
+    function loadBudget() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return { expenses: [] };
+
+        const parsed = JSON.parse(raw);
+
+        if (!parsed || typeof parsed !== "object") {
+          return { expenses: [] };
+        }
+
+        if (!Array.isArray(parsed.expenses)) {
+          parsed.expenses = [];
+        }
+
+        return parsed;
+      } catch (error) {
+        console.error("Budjettitietojen lukeminen epäonnistui:", error);
+        return { expenses: [] };
+      }
+    }
+
+    function createId(prefix = "item") {
+      return prefix + "-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8);
+    }
+
+    function numberValue(value) {
+      const number = Number(value);
+      return Number.isFinite(number) ? Math.max(0, number) : 0;
+    }
+
+    function getStep(amount) {
+      if (amount <= 20) return 0.5;
+      if (amount <= 100) return 1;
+      if (amount <= 500) return 5;
+      return 10;
+    }
+
+    function getIconForCategory(category = "") {
+      const key = String(category).toLowerCase();
+
+      if (key.includes("asumin")) return "home";
+      if (key.includes("ruoka")) return "restaurant";
+      if (key.includes("liikk")) return "directions_car";
+      if (key.includes("vapaa")) return "sports_esports";
+      if (key.includes("tilaus")) return "subscriptions";
+      if (key.includes("tervey")) return "health_and_safety";
+      if (key.includes("ost")) return "shopping_bag";
+
+      return "payments";
+    }
+
+    function formatEur(value) {
+      return new Intl.NumberFormat("fi-FI", {
+        style: "currency",
+        currency: "EUR",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(numberValue(value));
+    }
+
+    function formatNumber(value) {
+      return new Intl.NumberFormat("fi-FI", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+      }).format(numberValue(value));
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function createItemsFromExpenses(expenses) {
+      return expenses
+        .filter(expense => expense && typeof expense === "object")
+        .map((expense, index) => {
+          const amount = numberValue(expense.amount);
+
+          return {
+            id: expense.id != null ? String(expense.id) : "expense-" + index,
+            sourceId: expense.id != null ? String(expense.id) : "expense-" + index,
+            name: String(
+              expense.title ||
+              expense.name ||
+              expense.category ||
+              "Meno"
+            ),
+            category: String(expense.category || "Muut"),
+            icon: expense.icon || getIconForCategory(expense.category),
+            originalAmount: amount,
+            value: amount,
+            custom: false
+          };
+        });
+    }
+
+    function createCustomItem(name, amount) {
+      return {
+        id: createId("custom"),
+        sourceId: null,
+        name,
+        category: "Muut",
+        icon: "savings",
+        originalAmount: amount,
+        value: amount,
+        custom: true
+      };
+    }
+
+    function loadInitialState() {
+      const budget = loadBudget();
+      const loaded = createItemsFromExpenses(budget.expenses);
+
+      items = loaded.map(item => ({ ...item }));
+      originalItems = loaded.map(item => ({ ...item }));
+    }
+
+    function getMonthlySavings() {
+      return items.reduce((total, item) => {
+        return total + Math.max(0, item.originalAmount - item.value);
+      }, 0);
+    }
+
+    function updateSummary() {
+      const monthly = getMonthlySavings();
+      const annual = monthly * 12;
+
+      elements.monthlySavings.textContent = formatEur(monthly) + "/kk";
+      elements.annualSavings.textContent = formatEur(annual);
+
+      const count = items.length;
+      elements.itemCountBadge.textContent =
+        count === 1 ? "1 muuttuja" : `${count} muuttujaa`;
+    }
+
+    function renderItems() {
+      if (!items.length) {
+        elements.itemsContainer.innerHTML = `
+          <div class="rounded-2xl border border-slate-200 bg-white p-6 text-center">
+            <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100">
+              <span class="material-symbols-rounded text-slate-500">receipt_long</span>
+            </div>
+            <h3 class="mt-3 text-sm font-bold">Ei menoja simulaatiossa</h3>
+            <p class="mx-auto mt-1 max-w-sm text-sm leading-6 text-slate-500">
+              Lisää ensin menoja Tulot/Menot-sivulla tai lisää oma säästökohde tästä.
+            </p>
+          </div>
+        `;
+        updateSummary();
+        return;
+      }
+
+      elements.itemsContainer.innerHTML = items.map((item, index) => {
+        const original = numberValue(item.originalAmount);
+        const value = numberValue(item.value);
+        const saved = Math.max(0, original - value);
+        const max = Math.max(original, 0.01);
+        const percent = original > 0 ? Math.min(100, Math.max(0, (value / original) * 100)) : 0;
+        const step = getStep(original || 100);
+
+        return `
+          <article
+            class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+            data-index="${index}"
+          >
+            <div class="flex items-start gap-3">
+              <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100">
+                <span class="material-symbols-rounded text-slate-600">${escapeHtml(item.icon)}</span>
+              </div>
+
+              <div class="min-w-0 flex-1">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <h3 class="truncate text-sm font-bold text-slate-900">
+                      ${escapeHtml(item.name)}
+                    </h3>
+                    <p class="mt-0.5 text-xs text-slate-500">
+                      Nykyinen ${formatEur(original)}/kk
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    class="delete-item flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                    data-index="${index}"
+                    aria-label="Poista ${escapeHtml(item.name)} simulaatiosta"
+                  >
+                    <span class="material-symbols-rounded text-[20px]">delete</span>
+                  </button>
+                </div>
+
+                <div class="mt-4 flex items-end justify-between gap-3">
+                  <div>
+                    <p class="text-xs font-medium text-slate-400">Simuloitu meno</p>
+                    <p class="mt-0.5 text-lg font-bold text-slate-900">
+                      ${formatEur(value)}<span class="text-xs font-medium text-slate-400">/kk</span>
+                    </p>
+                  </div>
+
+                  <div class="text-right">
+                    <p class="text-xs font-medium text-slate-400">Säästö</p>
+                    <p class="mt-0.5 text-sm font-bold ${saved > 0 ? "text-emerald-700" : "text-slate-500"}">
+                      ${saved > 0 ? "+" : ""}${formatEur(saved)}/kk
+                    </p>
+                  </div>
+                </div>
+
+                <div class="mt-4">
+                  <input
+                    class="item-slider w-full cursor-pointer accent-slate-900"
+                    type="range"
+                    min="0"
+                    max="${max}"
+                    step="${step}"
+                    value="${Math.min(value, max)}"
+                    data-index="${index}"
+                    aria-label="Säädä ${escapeHtml(item.name)} menoa"
+                  >
+
+                  <div class="mt-1.5 flex justify-between text-[11px] text-slate-400">
+                    <span>0 €</span>
+                    <span>${formatNumber(original)} €</span>
+                  </div>
+                </div>
+
+                ${
+                  saved > 0
+                    ? `
+                      <div class="mt-3 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                        <span class="material-symbols-rounded text-[16px]">trending_down</span>
+                        Säästät ${formatEur(saved)}/kk
+                      </div>
+                    `
+                    : ""
+                }
+              </div>
+            </div>
+          </article>
+        `;
+      }).join("");
+
+      attachItemListeners();
+      updateSummary();
+    }
+
+    function attachItemListeners() {
+      document.querySelectorAll(".item-slider").forEach(slider => {
+        slider.addEventListener("input", event => {
+          const index = Number(event.currentTarget.dataset.index);
+          if (!items[index]) return;
+
+          items[index].value = numberValue(event.currentTarget.value);
+          renderItems();
+        });
+      });
+
+      document.querySelectorAll(".delete-item").forEach(button => {
+        button.addEventListener("click", event => {
+          const index = Number(event.currentTarget.dataset.index);
+          if (!items[index]) return;
+
+          items.splice(index, 1);
+          renderItems();
+        });
+      });
+    }
+
+    function openAddForm() {
+      elements.addItemForm.classList.remove("hidden");
+      elements.showAddFormBtn.classList.add("hidden");
+      elements.newItemName.focus();
+    }
+
+    function closeAddForm() {
+      elements.addItemForm.classList.add("hidden");
+      elements.showAddFormBtn.classList.remove("hidden");
+      elements.newItemName.value = "";
+      elements.newItemCost.value = "";
+    }
+
+    function addCustomItem() {
+      const name = elements.newItemName.value.trim();
+      const amount = numberValue(elements.newItemCost.value);
+
+      if (!name) {
+        showToast("Anna säästökohteelle nimi.");
+        elements.newItemName.focus();
+        return;
+      }
+
+      if (amount <= 0) {
+        showToast("Anna kuukausimenoksi suurempi arvo kuin 0 €.");
+        elements.newItemCost.focus();
+        return;
+      }
+
+      items.push(createCustomItem(name, amount));
+      renderItems();
+      closeAddForm();
+      showToast("Säästökohde lisätty.");
+    }
+
+    function resetSimulation() {
+      items = originalItems.map(item => ({
+        ...item,
+        value: item.originalAmount
+      }));
+
+      renderItems();
+      showToast("Simulaatio palautettu lähtötilanteeseen.");
+    }
+
+    function saveSimulationToBudget() {
+      const budget = loadBudget();
+
+      if (!Array.isArray(budget.expenses)) {
+        budget.expenses = [];
+      }
+
+      const expenses = budget.expenses.map(expense => ({ ...expense }));
+
+      const usedExpenseIndexes = new Set();
+
+      items.forEach(item => {
+        if (item.custom) return;
+
+        let index = -1;
+
+        if (item.sourceId != null) {
+          index = expenses.findIndex(
+            (expense, expenseIndex) =>
+              !usedExpenseIndexes.has(expenseIndex) &&
+              expense &&
+              expense.id != null &&
+              String(expense.id) === String(item.sourceId)
+          );
+        }
+
+        if (index === -1) {
+          index = expenses.findIndex(
+            (expense, expenseIndex) =>
+              !usedExpenseIndexes.has(expenseIndex) &&
+              expense &&
+              String(
+                expense.title ||
+                expense.name ||
+                expense.category ||
+                ""
+              ) === item.name
+          );
+        }
+
+        if (index !== -1) {
+          expenses[index].amount = numberValue(item.value);
+          usedExpenseIndexes.add(index);
+        }
+      });
+
+      // Simulaatioon lisätyt uudet kohteet viedään budjettiin uusina menoina.
+      items
+        .filter(item => item.custom)
+        .forEach(item => {
+          expenses.push({
+            id: createId("expense"),
+            title: item.name,
+            category: "Muut",
+            amount: numberValue(item.value)
+          });
+        });
+
+      budget.expenses = expenses;
+
+      // Säilytetään kaikki muut sovelluksen mahdolliset tiedot ennallaan.
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(budget));
+
+      // Tallennuksen jälkeen nykyinen budjetti toimii uutena lähtötilanteena.
+      originalItems = createItemsFromExpenses(budget.expenses).map(item => ({ ...item }));
+      items = originalItems.map(item => ({ ...item }));
+
+      // Ilmoitetaan muille saman sivuston sivuille, että budjetti muuttui.
+      window.dispatchEvent(new CustomEvent("budjettikompassi_update"));
+
+      // Yhteensopivuuden vuoksi myös vanha tapahtumanimi.
+      window.dispatchEvent(new CustomEvent("budjettikompassi:updated"));
+
+      return true;
+    }
+
+    function showToast(message) {
+      elements.toast.textContent = message;
+      elements.toast.classList.remove("hidden");
+
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => {
+        elements.toast.classList.add("hidden");
+      }, 2200);
+    }
+
+    elements.showAddFormBtn.addEventListener("click", openAddForm);
+    elements.cancelAddBtn.addEventListener("click", closeAddForm);
+    elements.confirmAddBtn.addEventListener("click", addCustomItem);
+
+    elements.newItemName.addEventListener("keydown", event => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        elements.newItemCost.focus();
+      }
+    });
+
+    elements.newItemCost.addEventListener("keydown", event => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        addCustomItem();
+      }
+    });
+
+    elements.resetBtn.addEventListener("click", resetSimulation);
+
+    elements.saveBtn.addEventListener("click", () => {
+      const confirmed = saveSimulationToBudget();
+
+      if (confirmed) {
+        showToast("Muutokset tallennettu budjettiin.");
+      }
+    });
+
+    elements.backBtn.addEventListener("click", () => {
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        window.location.href = "etusivu.html";
+      }
+    });
+
+    // Jos toinen sivu muuttaa budjettia, päivitetään tämän sivun lähtötilanne.
+    window.addEventListener("budjettikompassi_update", () => {
+      loadInitialState();
+      renderItems();
+    });
+
+    window.addEventListener("storage", event => {
+      if (event.key === STORAGE_KEY) {
+        loadInitialState();
+        renderItems();
+      }
+    });
+
+    loadInitialState();
+    renderItems();
+  </script>
+</body>
+</html>

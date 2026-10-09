@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+
+<html lang="fi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link rel="stylesheet" href="style.css">
+<title>Budjettikompassi – Etusivu</title>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+</head>
+<body class="bg-background text-on-surface min-h-screen flex flex-col justify-between selection:bg-primary-fixed selection:text-primary">
+<!-- Yläpalkki (TopAppBar) -->
+<header class="site-header">
+    <div class="site-header__inner">
+        <div class="logo">Budjettikompassi</div>
+    </div>
+</header>
+<!-- Pääsisältö -->
+<main class="w-full max-w-lg mx-auto px-space-md pt-space-md pb-28 flex flex-col gap-space-md">
+<!-- Kuukausivalitsin & Kannustava tilannekatsaus -->
+<section class="flex flex-col items-center gap-space-sm">
+<div class="inline-flex items-center bg-surface-container-lowest border border-surface-container rounded-full px-2 py-1 custom-shadow">
+<button aria-label="Edellinen kuukausi" class="w-9 h-9 rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container active:scale-90 flex items-center justify-center transition-all cursor-pointer" id="prev-month-btn" type="button">
+<span class="material-symbols-outlined text-[20px]">chevron_left</span>
+</button>
+<span class="text-label-lg font-label-lg px-space-md text-on-surface min-w-[140px] text-center select-none data-transition" id="month-label">Lokakuu 2026</span>
+<button aria-label="Seuraava kuukausi" class="w-9 h-9 rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container active:scale-90 flex items-center justify-center transition-all cursor-pointer" id="next-month-btn" type="button">
+<span class="material-symbols-outlined text-[20px]">chevron_right</span>
+</button>
+</div>
+</section>
+<!-- Yhteenveto-kortti -->
+<section class="bg-surface-container-lowest rounded-2xl p-space-md border border-surface-container custom-shadow">
+<div class="grid grid-cols-3 divide-x divide-surface-container">
+<!-- Tulot -->
+<div class="flex flex-col items-center px-1 text-center">
+<span class="text-label-sm font-label-sm text-outline mb-0.5">Tulot</span>
+<span class="text-headline-md font-headline-md text-primary-container data-transition" id="income-val">–</span>
+</div>
+<!-- Menot -->
+<div class="flex flex-col items-center px-1 text-center">
+<span class="text-label-sm font-label-sm text-outline mb-0.5">Menot</span>
+<span class="text-headline-md font-headline-md text-on-surface data-transition" id="expense-val">–</span>
+</div>
+<!-- Jäljellä -->
+<div class="flex flex-col items-center px-1 text-center">
+<span class="text-label-sm font-label-sm text-outline mb-0.5">Jäljellä</span>
+<span class="text-headline-md font-headline-md text-primary-container data-transition" id="remaining-val">–</span>
+<span class="text-[11px] text-primary-container font-medium mt-0.5 flex items-center gap-0.5 data-transition" id="status-badge">
+<span class="material-symbols-outlined text-[12px]" id="status-icon">check_circle</span>
+</span>
+</div>
+<span class="text-label-md font-label-md text-tertiary-container block">Säästötavoite</span>
+<span class="text-headline-sm font-headline-sm text-on-surface truncate block data-transition" id="goal-name">Hätävara / Puskuri</span>
+</div>
+</div>
+<div class="text-right shrink-0" id="goal-amounts">
+<span class="text-headline-sm font-headline-sm text-on-surface data-transition" id="savings-current">–</span>
+<span class="text-body-sm font-body-sm text-outline data-transition" id="goal-target"> / –</span>
+</div>
+</div>
+<!-- Edistymispalkki -->
+<div class="w-full bg-surface-container-low h-3 rounded-full overflow-hidden p-0.5 flex items-center">
+<div class="bg-tertiary-fixed-dim h-full rounded-full progress-bar-transition" id="goal-bar-fill"></div>
+</div>
+<div class="flex justify-between items-center text-label-sm font-label-sm text-on-surface-variant pt-0.5">
+<span class="data-transition" id="goal-percent">Ei tavoitetta</span>
+<span class="text-tertiary-container font-semibold data-transition" id="goal-monthly-transfer">Ei asetettu</span>
+</div>
+</section>
+<!-- Menot kategorioittain -->
+<section id="category-section"
+  class="bg-surface-container-lowest rounded-2xl p-space-md border border-surface-container custom-shadow flex flex-col gap-space-md">
+
+  <!-- Otsikko ja kokonaismenot -->
+  <div class="flex flex-col gap-1">
+    <h2 class="text-headline-sm font-headline-sm text-on-surface">
+      Menot kategorioittain
+    </h2>
+
+    <p class="text-body-sm font-body-sm text-outline data-transition"
+       id="category-subtitle">
+      Ei vielä menoja
+    </p>
+
+    <span
+      class="text-headline-md font-headline-md text-on-surface tracking-tight data-transition hidden"
+      id="category-total">
+    </span>
+  </div>
+
+  <!-- Segmentoitu palkki -->
+  <div class="w-full flex h-3.5 rounded-full overflow-hidden gap-1 bg-surface-container-low p-0.5">
+    <div class="rounded-full h-full progress-bar-transition" id="bar-asuminen" title="Asuminen"></div>
+    <div class="rounded-full h-full progress-bar-transition" id="bar-ruoka" title="Ruoka"></div>
+    <div class="rounded-full h-full progress-bar-transition" id="bar-liikkuminen" title="Liikkuminen"></div>
+    <div class="rounded-full h-full progress-bar-transition" id="bar-vapaaaika" title="Vapaa-aika"></div>
+    <div class="rounded-full h-full progress-bar-transition" id="bar-tilaukset" title="Tilaukset"></div>
+    <div class="rounded-full h-full progress-bar-transition" id="bar-muut" title="Muut"></div>
+  </div>
+  <!-- AINOA kategoriaruudukko -->
+  <div class="grid grid-cols-2 gap-space-sm pt-space-xs">
+    <!-- Asuminen -->
+    <div class="flex items-center justify-between p-2.5 rounded-xl bg-surface-container-low">
+      <div class="flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full shrink-0"></span>
+        <span class="text-label-md font-label-md text-on-surface truncate">
+          Asuminen
+        </span>
+      </div>
+      <div class="text-right shrink-0">
+        <span class="text-label-md font-label-md text-on-surface data-transition"
+              id="cat-asuminen-amount">–</span>
+        <span class="text-label-sm font-label-sm text-outline block data-transition"
+              id="cat-asuminen-percent">–</span>
+      </div>
+    </div>
+
+    <!-- Ruoka -->
+    <div class="flex items-center justify-between p-2.5 rounded-xl bg-surface-container-low">
+      <div class="flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full shrink-0"></span>
+        <span class="text-label-md font-label-md text-on-surface truncate">
+          Ruoka
+        </span>
+      </div>
+      <div class="text-right shrink-0">
+        <span class="text-label-md font-label-md text-on-surface data-transition"
+              id="cat-ruoka-amount">–</span>
+        <span class="text-label-sm font-label-sm text-outline block data-transition"
+              id="cat-ruoka-percent">–</span>
+      </div>
+    </div>
+
+    <!-- Liikkuminen -->
+    <div class="flex items-center justify-between p-2.5 rounded-xl bg-surface-container-low">
+      <div class="flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full shrink-0"></span>
+        <span class="text-label-md font-label-md text-on-surface truncate">
+          Liikkuminen
+        </span>
+      </div>
+      <div class="text-right shrink-0">
+        <span class="text-label-md font-label-md text-on-surface data-transition"
+              id="cat-liikkuminen-amount">–</span>
+        <span class="text-label-sm font-label-sm text-outline block data-transition"
+              id="cat-liikkuminen-percent">–</span>
+      </div>
+    </div>
+
+    <!-- Vapaa-aika -->
+    <div class="flex items-center justify-between p-2.5 rounded-xl bg-surface-container-low">
+      <div class="flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full shrink-0"></span>
+        <span class="text-label-md font-label-md text-on-surface truncate">
+          Vapaa-aika
+        </span>
+      </div>
+      <div class="text-right shrink-0">
+        <span class="text-label-md font-label-md text-on-surface data-transition"
+              id="cat-vapaaaika-amount">–</span>
+        <span class="text-label-sm font-label-sm text-outline block data-transition"
+              id="cat-vapaaaika-percent">–</span>
+      </div>
+    </div>
+
+    <!-- Tilaukset -->
+    <div class="flex items-center justify-between p-2.5 rounded-xl bg-surface-container-low">
+      <div class="flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full shrink-0"></span>
+        <span class="text-label-md font-label-md text-on-surface truncate">
+          Tilaukset
+        </span>
+      </div>
+      <div class="text-right shrink-0">
+        <span class="text-label-md font-label-md text-on-surface data-transition"
+              id="cat-tilaukset-amount">–</span>
+        <span class="text-label-sm font-label-sm text-outline block data-transition"
+              id="cat-tilaukset-percent">–</span>
+      </div>
+    </div>
+
+    <!-- Muut -->
+    <div class="flex items-center justify-between p-2.5 rounded-xl bg-surface-container-low">
+      <div class="flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full shrink-0"></span>
+        <span class="text-label-md font-label-md text-on-surface truncate">
+          Muut
+        </span>
+      </div>
+      <div class="text-right shrink-0">
+        <span class="text-label-md font-label-md text-on-surface data-transition"
+              id="cat-muut-amount">–</span>
+        <span class="text-label-sm font-label-sm text-outline block data-transition"
+              id="cat-muut-percent">–</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+<!-- Pikatoiminnot -->
+<section class="flex flex-col gap-space-sm pt-space-xs">
+<div class="grid grid-cols-2 gap-space-sm">
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Shared Component) -->
+ <nav aria-label="Alapalkin päänavigaatio"
+     class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-space-xs pb-safe bg-surface-container-lowest shadow-md border-t border-surface-container">
+
+    <a aria-current="page"
+    class="flex flex-col items-center justify-center text-on-surface-variant py-space-xs hover:bg-surface-container-low transition-transform duration-150 active:scale-[0.98] flex-1 min-w-0"
+       href="etusivu.html">
+        <span class="material-symbols-outlined text-xl">home</span>
+        <span class="font-label-sm text-[10px] tracking-tight mt-0.5 truncate">Etusivu</span>
+    </a>
+
+    <a class="flex flex-col items-center justify-center text-on-surface-variant py-space-xs hover:bg-surface-container-low transition-transform duration-150 active:scale-[0.98] flex-1 min-w-0"
+       href="menot.html">
+        <span class="material-symbols-outlined text-xl">receipt_long</span>
+        <span class="font-label-sm text-[10px] tracking-tight mt-0.5 truncate">Tulot/Menot</span>
+    </a>
+
+    <a class="flex flex-col items-center justify-center text-primary-container py-space-xs font-semibold hover:bg-surface-container-low transition-transform duration-150 active:scale-[0.98] flex-1 min-w-0"
+       href="mitajos.html">
+        <span class="material-symbols-outlined text-xl">tune</span>
+        <span class="font-label-sm text-[10px] tracking-tight mt-0.5 font-bold truncate">Mitä jos?</span>
+    </a>
+
+</nav>
+<script>
+  // Aloitusnäkymä on tyhjä. Tiedot tulevat käyttäjän itse lisäämästä budjetista.
+  const STORAGE_KEY = 'budjettikompassi_data_v2';
+  const now = new Date();
+  const monthNames = ['Tammikuu','Helmikuu','Maaliskuu','Huhtikuu','Toukokuu','Kesäkuu','Heinäkuu','Elokuu','Syyskuu','Lokakuu','Marraskuu','Joulukuu'];
+  const currentMonthName = monthNames[now.getMonth()];
+  const currentMonthGenitive = currentMonthName.toLowerCase() + 'ssa';
+  const monthsData = [{
+    name: `${currentMonthName} ${now.getFullYear()}`,
+    genitive: currentMonthGenitive,
+    income: 0,
+    expense: 0,
+    savingsCurrent: 0,
+    savingsMonthly: 'Ei asetettu',
+    categories: {
+      asuminen: { amount: 0, percent: 0 }, ruoka: { amount: 0, percent: 0 },
+      liikkuminen: { amount: 0, percent: 0 }, vapaaaika: { amount: 0, percent: 0 },
+      tilaukset: { amount: 0, percent: 0 }, muut: { amount: 0, percent: 0 }
+    }
+  }];
+  let currentIndex = 0;
+
+  const monthLabel = document.getElementById("month-label");
+  const prevBtn = document.getElementById("prev-month-btn");
+  const nextBtn = document.getElementById("next-month-btn");
+
+  const incomeVal = document.getElementById("income-val");
+  const expenseVal = document.getElementById("expense-val");
+  const remainingVal = document.getElementById("remaining-val");
+  const statusBadge = document.getElementById("status-badge");
+  const statusIcon = document.getElementById("status-icon");
+
+  // Tavoitekortin elementit
+  const goalName = document.getElementById("goal-name");
+  const goalTarget = document.getElementById("goal-target");
+  const savingsCurrent = document.getElementById("savings-current");
+  const goalBarFill = document.getElementById("goal-bar-fill");
+  const goalPercent = document.getElementById("goal-percent");
+  const goalMonthlyTransfer = document.getElementById("goal-monthly-transfer");
+
+  const categorySubtitle = document.getElementById("category-subtitle");
+  const categoryTotal = document.getElementById("category-total");
+
+  // Formatointiapuri
+  function formatEur(num) {
+    return Math.round(Number(num) || 0).toLocaleString('fi-FI') + ' €';
+  }
+
+  // Kategorianimien mäppäys
+  function normalizeCategoryKey(name) {
+    if (!name) return 'muut';
+    const s = name.toLowerCase().trim();
+    if (s.includes('asumi')) return 'asuminen';
+    if (s.includes('ruo') || s.includes('ravinto')) return 'ruoka';
+    if (s.includes('liik') || s.includes('matka') || s.includes('auto') || s.includes('bussi')) return 'liikkuminen';
+    if (s.includes('vapaa') || s.includes('harrast') || s.includes('huvi')) return 'vapaaaika';
+    if (s.includes('tilaus') || s.includes('palvelu') || s.includes('netti')) return 'tilaukset';
+    return 'muut';
+  }
+
+  // Lukee jaetun tilan 'budjettikompassi_data'
+  function loadSharedData() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch (e) {
+      console.warn("Virhe luettaessa budjettikompassi_data:", e);
+      return null;
+    }
+  }
+
+  // Lukee jaetut tavoitteet: 'budjettikompassi_goals' tai 'budjettikompassi_data.goal'
+  function loadSharedGoal() {
+    try {
+      const rawGoals = localStorage.getItem('budjettikompassi_goals_v2');
+      if (rawGoals) {
+        const parsed = JSON.parse(rawGoals);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // Etsi aktiivinen tai ota ensimmäinen
+          const active = parsed.find(g => g && (g.active === true || g.selected === true)) || parsed[0];
+          if (active) return normalizeGoalObject(active);
+        } else if (parsed && typeof parsed === 'object') {
+          return normalizeGoalObject(parsed);
+        }
+      }
+
+      // Toissijainen lähde: budjettikompassi_data.goal tai budjettikompassi_data.goals
+      const sharedData = loadSharedData();
+      if (sharedData) {
+        if (sharedData.goal && typeof sharedData.goal === 'object') {
+          return normalizeGoalObject(sharedData.goal);
+        }
+        if (Array.isArray(sharedData.goals) && sharedData.goals.length > 0) {
+          const active = sharedData.goals.find(g => g && (g.active === true || g.selected === true)) || sharedData.goals[0];
+          if (active) return normalizeGoalObject(active);
+        }
+        // Jos sharedDatassa on suoraan määritelty savingsCurrent/savingsTarget
+        if (typeof sharedData.savingsTarget === 'number' || typeof sharedData.savingsCurrent === 'number') {
+          return normalizeGoalObject({
+            name: sharedData.goalName || 'Hätävara / Puskuri',
+            target: sharedData.savingsTarget || 500,
+            current: sharedData.savingsCurrent !== undefined ? sharedData.savingsCurrent : 150,
+            monthly: sharedData.savingsMonthly || 25
+          });
+        }
+      }
+    } catch (e) {
+      console.warn("Virhe luettaessa tavoitetta localStoragesta:", e);
+    }
+    return null;
+  }
+
+  function normalizeGoalObject(raw) {
+    if (!raw) return null;
+    const name = raw.name || raw.title || raw.goalName || '';
+    const target = Number(raw.target !== undefined ? raw.target : (raw.targetAmount !== undefined ? raw.targetAmount : 0)) || 0;
+    const current = Number(raw.current !== undefined ? raw.current : (raw.currentAmount !== undefined ? raw.currentAmount : (raw.saved !== undefined ? raw.saved : 0))) || 0;
+    const monthly = raw.monthly !== undefined ? raw.monthly : (raw.monthlyTransfer !== undefined ? raw.monthlyTransfer : (raw.monthlyAmount !== undefined ? raw.monthlyAmount : 0));
+    return { name, target, current, monthly };
+  }
+
+  function renderGoal(goalData) {
+    if (!goalData || !goalData.target) {
+      goalName.textContent = 'Ei tavoitetta';
+      savingsCurrent.textContent = '–';
+      goalTarget.textContent = ' / –';
+      goalBarFill.style.width = '0%';
+      goalPercent.textContent = 'Ei tavoitetta';
+      goalMonthlyTransfer.textContent = 'Ei asetettu';
+      return;
+    }
+    const name = goalData.name || 'Säästötavoite';
+    const target = Number(goalData.target) || 0;
+    const current = Number(goalData.current) || 0;
+    const monthly = Number(goalData.monthly) || 0;
+    goalName.textContent = name;
+    savingsCurrent.textContent = formatEur(current);
+    goalTarget.textContent = ` / ${formatEur(target)}`;
+    const pct = target > 0 ? Math.min(100, Math.round((current / target) * 100)) : 0;
+    goalBarFill.style.width = `${pct}%`;
+    goalPercent.textContent = `${pct} % saavutettu`;
+    goalMonthlyTransfer.textContent = monthly > 0 ? `+${monthly} € siirretty tässä kuussa` : 'Ei kuukausisummaa';
+  }
+
+  function getActiveMonthData() {
+    const base = monthsData[0];
+    const shared = loadSharedData();
+    if (!shared) return base;
+
+    let income = 0;
+    let expense = 0;
+    const categories = { asuminen: 0, ruoka: 0, liikkuminen: 0, vapaaaika: 0, tilaukset: 0, muut: 0 };
+
+    if (Array.isArray(shared.incomes)) {
+      income = shared.incomes.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+    }
+    if (Array.isArray(shared.expenses)) {
+      shared.expenses.forEach(item => {
+        const amount = Number(item.amount) || 0;
+        expense += amount;
+        categories[normalizeCategoryKey(item.category)] += amount;
+      });
+    }
+    if (typeof shared.income === 'number') income = shared.income;
+    if (typeof shared.expense === 'number') expense = shared.expense;
+
+    const categoryData = {};
+    Object.entries(categories).forEach(([key, amount]) => {
+      categoryData[key] = { amount, percent: expense > 0 ? Math.round((amount / expense) * 100) : 0 };
+    });
+
+    return { ...base, income, expense, categories: categoryData };
+  }
+
+  function updateView(animate = true) {
+    const data = getActiveMonthData();
+    const animatedElements = document.querySelectorAll('.data-transition');
+
+    if (animate) {
+      animatedElements.forEach(el => el.classList.add('data-fading'));
+    }
+
+    setTimeout(() => {
+      // Kuukausi
+      monthLabel.textContent = data.name;
+
+      // Yhteenveto
+      const hasData = data.income > 0 || data.expense > 0;
+      incomeVal.textContent = hasData ? formatEur(data.income) : '–';
+      expenseVal.textContent = hasData ? formatEur(data.expense) : '–';
+
+      const remaining = data.income - data.expense;
+      remainingVal.textContent = hasData ? formatEur(remaining) : '–';
+
+      if (remaining >= 0) {
+        remainingVal.className = "text-headline-md font-headline-md text-primary-container data-transition";
+        statusBadge.className = "text-[11px] text-primary-container font-medium mt-0.5 flex items-center gap-0.5 data-transition";
+        statusIcon.textContent = "check_circle";
+      } else {
+        remainingVal.className = "text-headline-md font-headline-md text-error data-transition";
+        statusBadge.className = "text-[11px] text-error font-medium mt-0.5 flex items-center gap-0.5 data-transition";
+        statusIcon.textContent = "warning";
+      }
+
+      // Säästötavoite jaetusta tilasta
+      const sharedGoal = loadSharedGoal();
+      renderGoal(sharedGoal);
+
+      // Menot kategorioittain
+      categorySubtitle.textContent =
+  data.expense > 0
+    ? `Kokonaiskulutus ${data.genitive}`
+    : 'Ei vielä menoja';
+
+if (data.expense > 0) {
+  categoryTotal.textContent = formatEur(data.expense);
+  categoryTotal.classList.remove('hidden');
+} else {
+  categoryTotal.textContent = '';
+  categoryTotal.classList.add('hidden');
+}
+      // Palkit ja kategoriat
+      const cats = ['asuminen', 'ruoka', 'liikkuminen', 'vapaaaika', 'tilaukset', 'muut'];
+      cats.forEach(catKey => {
+        const cat = data.categories[catKey] || { amount: 0, percent: 0 };
+        const bar = document.getElementById(`bar-${catKey}`);
+        const amt = document.getElementById(`cat-${catKey}-amount`);
+        const pct = document.getElementById(`cat-${catKey}-percent`);
+
+        if (bar) bar.style.width = `${cat.percent}%`;
+        if (amt) amt.textContent = formatEur(cat.amount);
+        if (pct) pct.textContent = `${cat.percent} %`;
+      });
+
+      // Nuolten tilat
+      prevBtn.disabled = true;
+      nextBtn.disabled = true;
+      prevBtn.style.opacity = '0.35';
+      nextBtn.style.opacity = '0.35';
+      prevBtn.style.cursor = 'not-allowed';
+      nextBtn.style.cursor = 'not-allowed';
+
+      if (animate) {
+        animatedElements.forEach(el => el.classList.remove('data-fading'));
+      }
+    }, animate ? 150 : 0);
+  }
+
+  // Erillinen funktio vain tavoitteen tarkistamiseen ja päivittämiseen nopeasti
+  let lastGoalSnapshot = '';
+  function updateGoalFromStorage() {
+    const rawGoals = localStorage.getItem('budjettikompassi_goals_v2') || '';
+    const rawData = localStorage.getItem(STORAGE_KEY) || '';
+    const currentSnapshot = rawGoals + '|' + rawData;
+
+    if (currentSnapshot !== lastGoalSnapshot) {
+      lastGoalSnapshot = currentSnapshot;
+      const sharedGoal = loadSharedGoal();
+      renderGoal(sharedGoal);
+    }
+  }
+
+  // Tapahtumankuuntelijat kuukausivalitsimelle
+  prevBtn.addEventListener('click', () => {
+    if (currentIndex > 0) {
+      currentIndex--;
+      updateView(true);
+    }
+  });
+
+  nextBtn.addEventListener('click', () => {
+    if (currentIndex < monthsData.length - 1) {
+      currentIndex++;
+      updateView(true);
+    }
+  });
+
+  // Reaaliaikainen jaetun tilan kuuntelu (storage-tapahtuma eri ikkunoille/välilehdille)
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'budjettikompassi_goals' || e.key === 'budjettikompassi_data' || !e.key) {
+      updateView(true);
+      updateGoalFromStorage();
+    }
+  });
+
+  // CustomEvent-tuki tavoitteen tai datan päivityksille samassa kontekstissa
+  window.addEventListener('budjettikompassi_update', () => {
+    updateView(true);
+    updateGoalFromStorage();
+  });
+
+  // Säännöllinen tarkistus esikatseluympäristöjä varten
+  setInterval(updateGoalFromStorage, 1000);
+
+  // Alustava tilan päivitys ladattaessa
+  document.addEventListener('DOMContentLoaded', () => {
+    updateView(false);
+    updateGoalFromStorage();
+  });
+  updateView(false);
+  updateGoalFromStorage();
+</script>
+</body></html>
